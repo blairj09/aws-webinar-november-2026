@@ -1,0 +1,68 @@
+---
+title: "Aurora Lending: exploring charge-off risk"
+subtitle: "Step through the analysis with Posit Assistant in Positron on Amazon SageMaker"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    fig-width: 8
+    fig-height: 4
+execute:
+  warning: false
+  message: false
+---
+
+::: {.callout-important}
+## Synthetic data
+
+The data is synthetic. Aurora Lending Group is a fictional company.
+:::
+
+## How to use this file
+
+This file is a starting point, not a finished analysis. Run the setup cell. Then, for each step, give Posit Assistant the prompt in that step and review the code it writes before you run it. Posit Assistant uses Claude on Amazon Bedrock, so each request goes through your organization's access, audit, cost, and guardrail controls.
+
+[`aurora-eda-reference.qmd`](aurora-eda-reference.qmd) has worked code for each step.
+
+## Setup
+
+There are no keys to set. In Positron on Amazon SageMaker, AWS credentials come from the Space's execution role.
+
+```{r}
+#| label: setup
+library(dplyr)
+library(ggplot2)
+source("athena.R")
+
+whoami()
+```
+
+## 1. Orient
+
+> What tables are in the `aurora_lending` database in Athena, and how do they relate to each other? Use `../commons-aurora/dictionaries/aurora_lending.yaml` for the column definitions.
+
+## 2. Load the loan book
+
+> Join `fct_loan_performance` to `dim_borrower` and `dim_loan_product` in Athena, and read the result into a tibble called `loans`. Keep the loan, borrower, and product columns we need for credit risk.
+
+Open `loans` in the Data Explorer to sort, filter, and check each column's summary.
+
+## 3. Check the data
+
+> Check `loans` for missing values, duplicate loan IDs, and values outside a sensible range. Summarize what you find in a short table.
+
+## 4. Where is the risk?
+
+> Calculate the charge-off rate by loan product and by FICO band at origination. Use the bands 580-619, 620-659, 660-699, 700-739, 740-779, and 780+, closed on the right. Show each as a bar chart.
+
+## 5. Ask a follow-up
+
+> Small business loans have the highest charge-off rate. Is that explained by FICO? Compare charge-off rates by product within each FICO band.
+
+## 6. Account for time on book
+
+> How does the charge-off rate change by origination year? Recent loans have had less time to charge off, so how should we read those years?
+
+## 7. Write the brief
+
+> Turn the findings into a one-page Quarto brief for the credit committee, in a new file named `brief.qmd`. Use the charts and tables from this file, and lead with the three most important findings.

@@ -13,6 +13,7 @@
 !/publish.sh
 !/security-guide/
 !/commons-aurora/
+!/posit-assistant-eda/
 
 # Render outputs and local-only files inside the tracked folders
 /.quarto/
@@ -31,5 +32,8 @@
 /commons-aurora/commons-cache/
 /commons-aurora/.shinychat/
 /commons-aurora/rsconnect/
+/posit-assistant-eda/*.html
+/posit-assistant-eda/*_files/
+/posit-assistant-eda/brief.*
 
 **/*.quarto_ipynb

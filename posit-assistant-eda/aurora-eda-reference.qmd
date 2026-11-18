@@ -1,0 +1,194 @@
+---
+title: "Aurora Lending: exploring charge-off risk (reference)"
+subtitle: "Worked code for each step in aurora-eda.qmd"
+format:
+  html:
+    toc: true
+    embed-resources: true
+    fig-width: 8
+    fig-height: 4
+execute:
+  warning: false
+  message: false
+---
+
+::: {.callout-important}
+## Synthetic data
+
+The data is synthetic. Aurora Lending Group is a fictional company.
+:::
+
+This file has one way to answer each prompt in [`aurora-eda.qmd`](aurora-eda.qmd). Posit Assistant may write different code. Compare the numbers, not the code.
+
+## Setup
+
+```{r}
+#| label: setup
+library(dplyr)
+library(ggplot2)
+source("athena.R")
+
+whoami()
+```
+
+## 1. Orient
+
+```{r}
+#| label: tables
+athena_query("
+  SELECT table_name
+  FROM information_schema.tables
+  WHERE table_schema = 'aurora_lending'
+  ORDER BY table_name
+")
+```
+
+`fct_loan_performance` has one row per loan. It joins to `dim_borrower` on `borrower_id`, to `dim_loan_product` on `product_id`, and to `dim_date` on `origination_date_key`.
+
+## 2. Load the loan book
+
+```{r}
+#| label: load
+loans <- athena_query("
+  SELECT f.loan_id,
+         f.origination_date,
+         f.principal_amount,
+         f.outstanding_balance,
+         f.apr,
+         f.dti,
+         f.fico_at_origination,
+         f.months_on_book,
+         f.delinquency_days,
+         f.charged_off,
+         p.product_name,
+         p.purpose,
+         p.term_months,
+         b.state,
+         b.income_band,
+         b.homeownership,
+         b.employment_length_years
+  FROM fct_loan_performance f
+  JOIN dim_loan_product p ON p.product_id = f.product_id
+  JOIN dim_borrower b ON b.borrower_id = f.borrower_id
+")
+
+glimpse(loans)
+```
+
+## 3. Check the data
+
+```{r}
+#| label: checks
+tibble(
+  check = c(
+    "Loans",
+    "Missing values, any column",
+    "Duplicate loan IDs",
+    "FICO outside 300-850",
+    "Negative outstanding balance",
+    "APR outside 0-100% (stored as a fraction)"
+  ),
+  result = c(
+    nrow(loans),
+    sum(is.na(loans)),
+    sum(duplicated(loans$loan_id)),
+    sum(loans$fico_at_origination < 300 | loans$fico_at_origination > 850),
+    sum(loans$outstanding_balance < 0),
+    sum(loans$apr < 0 | loans$apr > 1)
+  )
+)
+```
+
+## 4. Where is the risk?
+
+The FICO bands match the Portfolio Risk Review report. They are closed on the right, so a score of 620 falls in 580-619.
+
+```{r}
+#| label: bands
+loans <- loans |>
+  mutate(
+    fico_band = cut(
+      fico_at_origination,
+      breaks = c(579, 620, 660, 700, 740, 780, 850),
+      labels = c("580-619", "620-659", "660-699", "700-739", "740-779", "780+")
+    ),
+    vintage = as.integer(format(as.Date(origination_date), "%Y"))
+  )
+```
+
+```{r}
+#| label: by-product
+by_product <- loans |>
+  summarise(loans = n(), charge_off_rate = mean(charged_off), .by = product_name) |>
+  arrange(desc(charge_off_rate))
+
+by_product
+
+ggplot(by_product, aes(charge_off_rate, reorder(product_name, charge_off_rate))) +
+  geom_col(fill = "#447099") +
+  scale_x_continuous(labels = scales::percent) +
+  labs(title = "Charge-off rate by loan product", x = "Charge-off rate", y = NULL) +
+  theme_minimal()
+```
+
+```{r}
+#| label: by-fico
+by_fico <- loans |>
+  summarise(loans = n(), charge_off_rate = mean(charged_off), .by = fico_band) |>
+  arrange(fico_band)
+
+by_fico
+
+ggplot(by_fico, aes(fico_band, charge_off_rate)) +
+  geom_col(fill = "#447099") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Charge-off rate by FICO band at origination",
+       x = "FICO at origination", y = "Charge-off rate") +
+  theme_minimal()
+```
+
+## 5. Ask a follow-up
+
+```{r}
+#| label: product-within-fico
+#| fig-height: 5
+product_fico <- loans |>
+  summarise(loans = n(), charge_off_rate = mean(charged_off),
+            .by = c(product_name, fico_band))
+
+ggplot(product_fico, aes(fico_band, reorder(product_name, charge_off_rate), fill = charge_off_rate)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = scales::percent(charge_off_rate, accuracy = 1)), size = 3) +
+  scale_fill_gradient(low = "#F3F6F8", high = "#447099", labels = scales::percent) +
+  labs(title = "Charge-off rate by product within each FICO band",
+       x = "FICO at origination", y = NULL, fill = "Charge-off rate") +
+  theme_minimal()
+```
+
+Small business loans have the highest charge-off rate in every FICO band, from about 38% at 580-619 to about 5% at 780+. FICO doesn't explain the product's risk: it carries risk of its own.
+
+## 6. Account for time on book
+
+```{r}
+#| label: by-vintage
+by_vintage <- loans |>
+  summarise(loans = n(), charge_off_rate = mean(charged_off),
+            months_on_book = median(months_on_book), .by = vintage) |>
+  arrange(vintage)
+
+by_vintage
+
+ggplot(by_vintage, aes(vintage, charge_off_rate)) +
+  geom_line(color = "#447099", linewidth = 1) +
+  geom_point(color = "#447099") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Charge-off rate by origination year",
+       x = "Origination year", y = "Charge-off rate") +
+  theme_minimal()
+```
+
+The charge-off rate is about 10% in every origination year, even though 2025 loans have a median of only 5 months on book. In a real loan book, recent years usually look safer only because they are young, so compare years at the same months on book before you draw a conclusion.
+
+## 7. Write the brief
+
+Posit Assistant writes `brief.qmd` in this step. For a finished example of the same analysis, see the Portfolio Risk Review report in [posit-dev/positron-sagemaker-demo](https://github.com/posit-dev/positron-sagemaker-demo/tree/main/reports/aurora_lending).
