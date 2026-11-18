@@ -1,0 +1,8 @@
+# Public GitHub Pages build: QUARTO_PROFILE=publish quarto publish gh-pages
+project:
+  output-dir: _site
+
+# Turn off the review overlay and drop speaker notes from the published output.
+annotate: false
+filters:
+  - strip-notes.lua

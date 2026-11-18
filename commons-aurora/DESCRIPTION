@@ -1,0 +1,19 @@
+Package: commonsaurora
+Title: Aurora Lending Credit Risk Agent
+Version: 0.0.1
+Description: A commons data agent for the synthetic Aurora Lending Group loan
+    book in Amazon Athena, using Claude on Amazon Bedrock. Built for the
+    Nov 18, 2026 Posit and AWS workflow webinar.
+License: MIT
+Imports:
+    bsicons,
+    commons,
+    connectapi,
+    DBI,
+    ellmer,
+    htmltools,
+    paws.analytics,
+    paws.security.identity,
+    paws.storage,
+    shiny,
+    shinychat

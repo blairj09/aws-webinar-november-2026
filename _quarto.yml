@@ -1,0 +1,6 @@
+project:
+  type: default
+  render:
+    - index.qmd
+    - deck/webinar.qmd
+    - security-guide/security-guide.qmd

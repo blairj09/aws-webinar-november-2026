@@ -1,0 +1,56 @@
+meta:
+  name: Posit
+  link: https://posit.co
+
+color:
+  palette:
+    posit-blue: "#447099"
+    posit-gray: "#404041"
+    posit-orange: "#EE6331"
+    gray-300: "#717171"
+    off-white: "#F3F6F8"
+    blue-50: "#D0DBE5"
+    dark-blue: "#111C26"
+  foreground: posit-gray
+  background: "#FFFFFF"
+  primary: posit-blue
+  secondary: gray-300
+  light: off-white
+  dark: dark-blue
+
+typography:
+  fonts:
+    - family: Open Sans
+      source: file
+      files:
+        - path: assets/fonts/OpenSans.ttf
+        - path: assets/fonts/OpenSans-Italic.ttf
+          style: italic
+    - family: Source Code Pro
+      source: file
+      files:
+        - path: assets/fonts/SourceCodePro.ttf
+        - path: assets/fonts/SourceCodePro-Italic.ttf
+          style: italic
+  base:
+    family: Open Sans
+    weight: 400
+    line-height: 1.5
+  headings:
+    family: Open Sans
+    weight: 300
+    color: posit-gray
+  monospace:
+    family: Source Code Pro
+  link:
+    color: posit-blue
+
+logo:
+  images:
+    posit-color:
+      path: assets/logos/posit-horiz-full-color.png
+      alt: posit
+    posit-white:
+      path: assets/logos/posit-horiz-white.png
+      alt: posit
+  medium: posit-color

@@ -1,0 +1,177 @@
+name: aurora_lending
+description: 'Synthetic consumer lending book for Aurora Lending Group, a fictional
+  lender: one row per loan in fct_loan_performance, with borrower, product, and date
+  dimensions. Performance is as of 2025-12-31.'
+details: All data is synthetic and created for demonstration purposes only. Loaded
+  from Amazon Athena (database aurora_lending) when the app starts.
+tables:
+- name: dim_date
+  description: Calendar dimension covering the origination window.
+  columns:
+  - name: date_key
+    description: Date as YYYYMMDD.
+    type: number
+  - name: full_date
+    description: Calendar date.
+    type: date
+  - name: year
+    description: Calendar year.
+    type: number
+  - name: quarter
+    description: Calendar quarter
+    type: number
+  - name: month
+    description: Month number
+    type: number
+  - name: month_name
+    description: Full month name.
+    type: string
+  - name: day_of_month
+    description: Day of month.
+    type: number
+  - name: day_of_week
+    description: Monday=0 through Sunday=6.
+    type: number
+  - name: day_name
+    description: Full weekday name.
+    type: string
+  - name: is_weekend
+    description: True for Saturday and Sunday.
+    type: boolean
+- name: dim_loan_product
+  description: The eight lending products Aurora offers.
+  columns:
+  - name: product_id
+    description: Product key.
+    type: number
+  - name: product_name
+    description: Customer-facing product name.
+    type: string
+  - name: term_months
+    description: Contractual term.
+    type: number
+  - name: purpose
+    description: 'Stated use of funds: debt_consolidation, credit_card_refi, home_improvement,
+      auto_refinance, medical, small_business, education.'
+    type: string
+  - name: base_apr
+    description: Product floor APR before risk-based pricing.
+    type: number
+- name: dim_borrower
+  description: Borrower attributes as captured at application.
+  columns:
+  - name: borrower_id
+    description: Borrower key.
+    type: number
+  - name: age_band
+    description: Banded age.
+    type: string
+  - name: state
+    description: US state
+    type: string
+  - name: income_band
+    description: Banded annual income.
+    type: string
+  - name: annual_income
+    description: Stated annual income in USD.
+    type: number
+  - name: employment_length_years
+    description: Years in current employment.
+    type: number
+  - name: credit_score_band
+    description: Banded FICO at application.
+    type: string
+  - name: fico_score
+    description: FICO at application.
+    type: number
+  - name: homeownership
+    description: Housing status.
+    type: string
+- name: fct_loan_performance
+  description: One row per originated loan, with performance as of 2025-12-31.
+  columns:
+  - name: loan_id
+    description: Loan key.
+    type: number
+  - name: borrower_id
+    description: References dim_borrower.
+    type: number
+  - name: product_id
+    description: References dim_loan_product.
+    type: number
+  - name: origination_date_key
+    description: References dim_date.
+    type: number
+  - name: origination_date
+    description: Funding date.
+    type: date
+  - name: principal_amount
+    description: Amount advanced
+    type: number
+  - name: apr
+    description: Contract APR after risk-based pricing.
+    type: number
+  - name: fico_at_origination
+    description: FICO at funding.
+    type: number
+  - name: dti
+    description: Debt-to-income ratio including this loan.
+    type: number
+  - name: term_months
+    description: Contractual term.
+    type: number
+  - name: purpose
+    description: A copy from dim_loan_product
+    type: string
+  - name: employment_length_years
+    description: A copy from dim_borrower.
+    type: number
+  - name: months_on_book
+    description: Months since origination
+    type: number
+  - name: delinquency_days
+    description: Days past due. 120 or more means a charge-off.
+    type: number
+  - name: outstanding_balance
+    description: Remaining balance
+    type: number
+  - name: charged_off
+    description: The model target. True if the loan was charged off.
+    type: boolean
+  details: Join to dim_borrower on borrower_id, to dim_loan_product on product_id,
+    and to dim_date on origination_date_key = date_key. purpose and employment_length_years
+    are copied onto each loan, so most questions need no join.
+  definitions:
+  - name: loan_count
+    label: Number of loans
+    description: Number of originated loans.
+    expr: ROW_COUNT()
+  - name: charge_off_rate
+    label: Realized charge-off rate
+    description: Share of loans that charged off (delinquency of 120 days or more).
+      The rate the Portfolio Risk Review reports.
+    expr: AVG(CASE WHEN charged_off THEN 1 ELSE 0 END)
+  - name: total_originated
+    label: Total originated (USD)
+    description: Sum of principal advanced.
+    expr: SUM(principal_amount)
+  - name: total_outstanding
+    label: Total outstanding (USD)
+    description: Sum of remaining balances.
+    expr: SUM(outstanding_balance)
+  - name: average_apr
+    label: Average APR
+    description: Mean contract APR after risk-based pricing.
+    expr: AVG(apr)
+  - name: charged_off_loans
+    label: Charged-off loans
+    description: Loans that charged off.
+    expr: charged_off = TRUE
+  - name: fico_band
+    label: FICO band at origination
+    description: FICO band as defined in the Portfolio Risk Review. A score of 620
+      falls in 580-619, and so on, because the report bands are right-closed.
+    expr: CASE WHEN fico_at_origination <= 620 THEN '580-619' WHEN fico_at_origination
+      <= 660 THEN '620-659' WHEN fico_at_origination <= 700 THEN '660-699' WHEN fico_at_origination
+      <= 740 THEN '700-739' WHEN fico_at_origination <= 780 THEN '740-779' ELSE '780+'
+      END

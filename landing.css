@@ -1,0 +1,58 @@
+/* Landing page styles. Fonts come from the security guide's brand assets. */
+@font-face { font-family: "Open Sans"; src: url("security-guide/assets/fonts/OpenSans.ttf") format("truetype"); font-weight: 300 800; font-style: normal; }
+@font-face { font-family: "Source Code Pro"; src: url("security-guide/assets/fonts/SourceCodePro.ttf") format("truetype"); font-weight: 200 900; font-style: normal; }
+
+body {
+  font-family: "Open Sans", sans-serif;
+  color: #404041;
+  background: #F3F6F8;
+}
+
+.landing { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+.landing-logo { width: 130px; display: block; margin-bottom: 2.5rem; }
+
+.landing-eyebrow {
+  font-family: "Source Code Pro", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: #447099;
+  margin: 0 0 0.5rem;
+}
+.landing-title { font-weight: 300; font-size: 3rem; margin: 0 0 0.4rem; color: #404041; }
+.landing-sub { font-size: 1.2rem; font-weight: 600; color: #447099; margin: 0 0 2.5rem; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  border: 1px solid #D0DBE5;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.tile:hover, .tile:focus-visible {
+  box-shadow: 0 8px 24px rgba(17, 28, 38, 0.12);
+  transform: translateY(-2px);
+  color: inherit;
+}
+.tile img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top left;
+  border-bottom: 1px solid #D0DBE5;
+  display: block;
+}
+.tile-body { padding: 1.25rem 1.5rem 1.5rem; display: flex; flex-direction: column; flex: 1; }
+.tile-body h2 { font-weight: 300; font-size: 1.6rem; margin: 0 0 0.5rem; color: #404041; position: relative; padding-top: 0.6rem; border-bottom: none; padding-bottom: 0; }
+.tile-body h2::before { content: ""; position: absolute; top: 0; left: 0; width: 40px; height: 3px; background: #EE6331; }
+.tile-body p { margin: 0 0 1rem; line-height: 1.5; flex: 1; }
+.tile-cta { font-weight: 700; color: #447099; }
+
+.landing-foot { margin-top: 2rem; font-size: 0.95rem; }
+.landing-foot a { color: #447099; }

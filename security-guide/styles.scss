@@ -1,0 +1,26 @@
+/*-- scss:defaults --*/
+$posit-blue: #447099;
+$posit-gray: #404041;
+$light-blue: #D0DBE5;
+
+/*-- scss:rules --*/
+// The brand fonts are variable fonts; declare the full weight range so Light (300) and Bold (700) render
+@font-face { font-family: "Open Sans"; src: url("security-guide/assets/fonts/OpenSans.ttf") format("truetype"); font-weight: 300 800; font-style: normal; }
+@font-face { font-family: "Open Sans"; src: url("security-guide/assets/fonts/OpenSans-Italic.ttf") format("truetype"); font-weight: 300 800; font-style: italic; }
+@font-face { font-family: "Source Code Pro"; src: url("security-guide/assets/fonts/SourceCodePro.ttf") format("truetype"); font-weight: 200 900; font-style: normal; }
+
+.posit-logo { width: 130px; margin: 0 0 2rem 0; display: block; }
+// Headings: Light headline, sentence case; sub-heads Light with a short orange keyline
+h1.title { font-weight: 300; font-size: 2.6rem; margin-bottom: 0.2rem; }
+.subtitle { font-weight: 700; color: $posit-blue; font-size: 1.15rem; margin-top: 0; }
+h2 { font-weight: 300 !important; margin-top: 2.2rem; padding-top: 0.6rem; border-top: none; position: relative; }
+h2::before { content: ""; position: absolute; top: 0; left: 0; width: 40px; height: 3px; background: #EE6331; }
+strong, b { font-weight: 700; }
+.quarto-title-meta-heading { font-family: "Source Code Pro", monospace; text-transform: uppercase; letter-spacing: 0.08em; color: $posit-blue; font-size: 0.75rem; }
+
+// Table
+table { font-size: 0.92rem; }
+table thead th { background-color: $posit-blue !important; color: #FFFFFF !important; font-weight: 700; border-bottom: none !important; --bs-table-bg: #{$posit-blue}; --bs-table-color: #FFFFFF; }
+tbody tr:nth-child(even) { background: #F3F6F8; }
+tbody td:first-child { font-weight: 700; color: $posit-gray; }
+code { color: $posit-gray; background: #F3F6F8; }
