@@ -12,7 +12,7 @@ The slides and the security guide are published at <https://blairj09.github.io/a
 - **`deck/`:** the Quarto revealjs source for the webinar slides.
 - **`security-guide/`:** the Quarto source for "Posit and Amazon Bedrock: a guide for security and platform teams". It renders to HTML and PDF.
 - **`index.qmd`, `landing.css`, `assets/`:** the landing page for the published site.
-- **`publish.sh`:** renders the site and pushes it to the `gh-pages` branch.
+- **`.github/workflows/publish.yml`:** renders the site and publishes it to the `gh-pages` branch on every push to `main`. `publish.sh` does the same by hand.
 
 ## Set up R
 
