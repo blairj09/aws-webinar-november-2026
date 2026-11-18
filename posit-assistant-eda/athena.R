@@ -55,5 +55,5 @@ athena_query <- function(sql, database = athena_database()) {
   bucket <- sub("/.*$", "", location)
   key <- sub("^[^/]+/", "", location)
   body <- paws.storage::s3(config = config)$get_object(Bucket = bucket, Key = key)$Body
-  readr::read_csv(rawToChar(body), show_col_types = FALSE)
+  readr::read_csv(body, show_col_types = FALSE)
 }

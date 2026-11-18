@@ -11,3 +11,13 @@ $font-family-sans-serif: "Open Sans", -apple-system, "Segoe UI", Roboto, Arial, 
 .card-title, .card-header { font-weight: 700; color: #404041; }
 .quarto-dashboard .bslib-value-box .value-box-value { font-weight: 300; }
 .bslib-value-box.bg-light { background-color: #F3F6F8 !important; }
+
+.calls { display: block !important; overflow-y: auto; }
+.calls > * { flex: none !important; }
+.call-intro { color: #717171; }
+.call { display: block !important; flex: none !important; border-left: 3px solid #447099; padding: 0.4rem 0.9rem; margin-bottom: 1.1rem; }
+.call-check { border-left-color: #D0DBE5; opacity: 0.85; }
+.call-meta { font-size: 0.8rem; color: #717171; margin-bottom: 0.3rem; }
+.call-label { font-family: "Source Code Pro", monospace; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; color: #447099; margin-top: 0.4rem; }
+.call-text { white-space: pre-wrap; font-size: 0.82rem; background: #F3F6F8; padding: 0.5rem 0.7rem; border-radius: 4px; max-height: 18rem; overflow-y: auto; margin: 0.2rem 0 0; }
+.call-response { background: #FFFFFF; border: 1px solid #E2E6EA; }

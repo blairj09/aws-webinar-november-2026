@@ -8,6 +8,11 @@ format:
         href: https://github.com/blairj09/aws-webinar-november-2026
 params:
   hours: 24
+  # Prompts and responses are off by default. Turn them on for a demo with
+  # -P show_content:true. content_caller matches part of the caller's ARN.
+  show_content: false
+  content_caller: "persona-james-blair"
+  content_n: 30
 execute:
   echo: false
   warning: false
@@ -21,6 +26,7 @@ library(dplyr)
 library(plotly)
 `%||%` <- function(a, b) if (is.null(a)) b else a
 source("logs.R")
+source("content.R")
 
 hours <- as.numeric(params$hours)
 blue <- "#447099"
@@ -196,11 +202,62 @@ if (has_data) {
 }
 ```
 
+# Conversations
+
+```{r}
+#| title: "Prompts and responses"
+show_content <- isTRUE(as.logical(params$show_content))
+# Escape the text and write line breaks as entities, so blank lines or code
+# fences in a prompt can't end Pandoc's raw HTML block.
+pre_text <- function(text, class) {
+  html <- gsub("\n", "&#10;", htmltools::htmlEscape(text), fixed = TRUE)
+  htmltools::HTML(sprintf('<pre class="%s">%s</pre>', class, html))
+}
+card <- function(x) {
+  sent <- tidy_text(sent_text(x))
+  resp <- tidy_text(response_text(x))
+  check <- grepl("^\\[Tool call: classify\\]", resp)
+  htmltools::div(
+    class = paste("call", if (check) "call-check"),
+    htmltools::div(
+      class = "call-meta",
+      format(as.POSIXct(x$timestamp, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"), "%H:%M:%S UTC"),
+      " · ", short_model(x$modelId),
+      " · ", format(x$input$inputTokenCount + (x$input$cacheReadInputTokenCount %||% 0) + (x$input$cacheWriteInputTokenCount %||% 0), big.mark = ","), " tokens in",
+      if (check) " · Posit Assistant safety check before running code"
+    ),
+    htmltools::div(class = "call-label", "Sent"),
+    pre_text(sent, "call-text"),
+    htmltools::div(class = "call-label", "Response"),
+    pre_text(resp, "call-text call-response")
+  )
+}
+if (!show_content) {
+  htmltools::p("Prompts and responses are turned off. Render with ",
+               htmltools::code("-P show_content:true"), " to show them.")
+} else {
+  calls <- recent_invocations(params$content_caller, hours = hours,
+                              n = as.integer(params$content_n))
+  if (length(calls) == 0) {
+    htmltools::p("No calls from ", htmltools::code(params$content_caller), " in this window.")
+  } else {
+    htmltools::div(
+      class = "calls",
+      htmltools::p(class = "call-intro",
+        "The newest ", length(calls), " calls from ", htmltools::code(params$content_caller),
+        ", newest first. Each call shows the newest turn sent to the model and the model's answer. ",
+        "Thinking is left out, and long text is shortened."),
+      lapply(calls, card)
+    )
+  }
+}
+```
+
 # About
 
 This dashboard reads Amazon Bedrock model invocation logs from CloudWatch Logs with [paws](https://www.paws-r-sdk.com/). Each chart runs a CloudWatch Logs Insights query, so the aggregation happens in AWS and only the summary comes back to R.
 
 - **Callers** come from the IAM role that made the call. Session names are left out, because for SSO users the session name is an email address.
-- **Prompts and responses** are in the logs, but this dashboard doesn't show them.
+- **Prompts and responses** are in the logs. The Conversations page shows them only when you render with `-P show_content:true`, for one caller (`content_caller`). Leave it off for anything you share.
 - **Synthetic** callers are demo personas with seeded usage.
 - **Window:** set the `hours` parameter when you render, for example `quarto render dashboard.qmd -P hours:168` for the last 7 days.
