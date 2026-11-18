@@ -30,9 +30,13 @@ jobs:
       - name: Render
         run: quarto render
 
-      - uses: quarto-dev/quarto-actions/publish@v2
+      # quarto publish only handles website, book, and manuscript projects, and
+      # this is a default project, so push the rendered _site folder directly.
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          target: gh-pages
-          render: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./_site
+          enable_jekyll: false
+          commit_message: Publish site
