@@ -1,6 +1,5 @@
 # Whitelist: only public material is tracked.
-# The deck source (deck/, with speaker notes), notes, drafts and setup stay local.
-# publish.sh still renders the deck, with notes stripped, to gh-pages.
+# Notes, drafts and setup stay local. The deck's raw screenshots stay local too.
 /*
 !/.gitignore
 !/README.md
@@ -15,6 +14,7 @@
 !/strip-notes.lua
 !/publish.sh
 !/security-guide/
+!/deck/
 !/commons-aurora/
 !/posit-assistant-eda/
 !/bedrock-usage-dashboard/
@@ -26,6 +26,7 @@
 .DS_Store
 *.annotations.json
 /deck/_publish.yml
+/deck/assets/screens/raw/
 /deck/rsconnect-python/
 /deck/webinar.html
 /deck/webinar_files/

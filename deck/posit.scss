@@ -1,0 +1,161 @@
+/*-- scss:defaults --*/
+$posit-blue: #447099;
+$posit-gray: #404041;
+$posit-gray-light: #717171;
+$posit-orange: #EE6331;
+$dark-blue-3: #111C26;
+$dark-blue-2: #22384C;
+$light-blue-1: #D0DBE5;
+$off-white: #F3F6F8;
+$muted-blue: #A5BDD3;
+
+$font-family-sans-serif: "Open Sans", Arial, sans-serif;
+$font-family-monospace: "Source Code Pro", monospace;
+$presentation-font-size-root: 40px;
+$presentation-heading-font: "Open Sans", Arial, sans-serif;
+$presentation-heading-color: $posit-gray;
+$presentation-heading-font-weight: 300;
+$presentation-heading-text-transform: none;
+$presentation-heading-letter-spacing: -0.01em;
+$presentation-h2-font-size: 1.9em;
+$body-color: $posit-gray;
+$link-color: $posit-blue;
+$code-block-bg: $off-white;
+$code-block-border-color: $light-blue-1;
+
+/*-- scss:rules --*/
+@font-face { font-family: "Open Sans"; src: url("assets/fonts/OpenSans.ttf") format("truetype"); font-weight: 300 800; }
+@font-face { font-family: "Open Sans"; src: url("assets/fonts/OpenSans-Italic.ttf") format("truetype"); font-weight: 300 800; font-style: italic; }
+@font-face { font-family: "Source Code Pro"; src: url("assets/fonts/SourceCodePro.ttf") format("truetype"); font-weight: 200 900; }
+
+.reveal { color: $posit-gray; }
+.reveal .slides { text-align: left; }
+.reveal h1, .reveal h2, .reveal h3 { text-align: left; }
+.reveal h2 { margin-bottom: 0.6em; }
+.reveal strong { font-weight: 700; }
+.reveal p, .reveal li { line-height: 1.4; }
+.reveal ul { margin-left: 1em; }
+.reveal li { margin-bottom: 0.35em; }
+
+/* Eyebrow: Source Code Pro, uppercase, tracked */
+.eyebrow {
+  font-family: "Source Code Pro", monospace; font-weight: 400; text-transform: uppercase;
+  letter-spacing: 0.08em; font-size: 0.6em; color: $posit-blue; margin: 0 0 0.4em 0 !important;
+}
+.subhead { font-weight: 700; color: $posit-blue; font-size: 0.95em; }
+.muted { color: $posit-gray-light; }
+.small { font-size: 0.7em; }
+.footnote { position: absolute; bottom: -1.6em; left: 0; font-size: 0.6em; color: $posit-gray-light; }
+
+.reveal h2 .eyebrow { display: block; font-size: 0.32em; margin-bottom: 0.7em !important; }
+
+/* Dark opener / dividers */
+.reveal .slide-background.dark { background-color: $dark-blue-3; }
+.reveal section.dark, .reveal section.dark h1, .reveal section.dark h2 { color: #FFFFFF; }
+.reveal section.dark h1 { font-weight: 300; font-size: 2.4em; line-height: 1.1; }
+.reveal section.dark h2 { font-weight: 300; }
+.reveal section.dark .eyebrow { color: $posit-orange; }
+.reveal section.dark .subhead { color: $muted-blue; }
+.reveal section.dark p, .reveal section.dark li { color: #FFFFFF; }
+.reveal section.dark a { color: $muted-blue; text-decoration: underline; }
+.reveal section.dark .muted { color: $muted-blue; }
+.bar { width: 40px; height: 3px; background: $posit-orange; margin: 0 0 0.6em 0; }
+.reveal img.dark-logo { display: block; height: 56px; width: auto; margin: 0 0 140px 0; border: 0; }
+
+/* Numbered feature cards */
+.cards { display: grid; gap: 36px; margin-top: 0.8em; }
+.cards.c2 { grid-template-columns: repeat(2, 1fr); }
+.cards.c3 { grid-template-columns: repeat(3, 1fr); }
+.cards.c4 { grid-template-columns: repeat(4, 1fr); }
+.card {
+  background: $light-blue-1; border-left: 3px solid $posit-blue; border-radius: 12px;
+  padding: 32px 36px; font-size: 0.8em; line-height: 1.4;
+}
+.card .num { font-family: "Source Code Pro", monospace; letter-spacing: 0.08em; color: $posit-blue; font-size: 0.85em; }
+.card .t { font-weight: 700; display: block; margin: 0.2em 0 0.3em 0; font-size: 1.1em; }
+.card.light { background: $off-white; }
+
+/* Demo cue */
+.demo-cue {
+  display: inline-block; font-family: "Source Code Pro", monospace; text-transform: uppercase;
+  letter-spacing: 0.08em; font-size: 0.55em; color: #FFFFFF; background: $posit-blue;
+  border-radius: 4px; padding: 6px 14px; margin-bottom: 0.6em;
+}
+
+/* Simple architecture diagram */
+.arch { display: grid; grid-template-columns: 1fr 70px 1.8fr 70px 1fr; align-items: center; gap: 0; font-size: 0.78em; margin-top: 0.4em; }
+.arch .box { border-radius: 12px; padding: 18px 22px; }
+.arch .clients .box { background: $off-white; border: 2px solid $light-blue-1; margin: 12px 0; }
+.arch .bedrock { background: $dark-blue-2; color: #FFFFFF; padding: 24px 26px; border-radius: 12px; }
+.arch .bedrock .t { font-weight: 700; font-size: 1.15em; display: block; margin-bottom: 0.4em; }
+.arch .bedrock p { margin: 0; }
+.arch .bedrock .chips p { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: 0.3em; }
+.arch .bedrock .chip { grid-column: span 2; display: flex; align-items: center; justify-content: center; text-align: center; background: #FFFFFF; color: $dark-blue-2; border-radius: 8px; padding: 16px 12px; font-size: 0.9em; font-weight: 600; }
+/* Last two chips share the second row evenly */
+.arch .bedrock .chip:nth-child(n+4) { grid-column: span 3; }
+/* Audit layer drawn as a ring around Bedrock */
+.arch .audit-ring { position: relative; border: 3px dashed $posit-orange; border-radius: 20px; padding: 34px 20px 18px; }
+.arch .audit-ring > p { margin: 0; }
+.arch .ring-label { position: absolute; top: -0.85em; left: 50%; transform: translateX(-50%); background: #FFFFFF; padding: 0 14px; font-weight: 700; color: $posit-orange; white-space: nowrap; font-size: 0.85em; }
+.arch .ring-items p { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0 0 0; }
+.arch .ring-item { background: $off-white; border-radius: 8px; padding: 10px 12px; font-size: 0.72em; color: $posit-gray; text-align: center; line-height: 1.3; }
+.arch .arrow { height: 4px; background: $posit-orange; position: relative; margin: 0 6px; }
+.arch .arrow::after { content: ""; position: absolute; right: -2px; top: -8px; border-left: 14px solid $posit-orange; border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+.arch .models .box { background: $light-blue-1; margin: 8px 0; padding: 12px 18px; }
+.arch .t2 { font-weight: 700; display: block; }
+
+/* Screenshots */
+.reveal img.screen { border-radius: 12px; box-shadow: 0 6px 24px rgba(17, 28, 38, 0.18); border: 1px solid #D0DBE5; max-height: 760px; width: auto; }
+.reveal .r-stack img.screen { margin: 0; }
+
+/* Guardrail chat flow */
+.chat-step { margin: 0 0 14px 0; }
+.chat-step img.screen { max-height: 178px; display: block; margin: 6px 0 0 0; }
+.outcome { display: inline-block; font-family: "Source Code Pro", monospace; text-transform: uppercase;
+  letter-spacing: 0.08em; font-size: 0.5em; font-weight: 400; color: #FFFFFF; border-radius: 4px; padding: 4px 12px; }
+.outcome.ok { background: $posit-blue; }
+.outcome.stop { background: $posit-gray; }
+
+/* Tables */
+.reveal table { font-size: 0.78em; border-collapse: collapse; }
+.reveal table th { font-weight: 700; color: $posit-gray; border-bottom: 2px solid $posit-blue; }
+.reveal table td, .reveal table th { padding: 10px 16px; }
+.reveal table tr { border-bottom: 1px solid $light-blue-1; }
+
+.reveal pre code { font-size: 0.72em; line-height: 1.35; max-height: 600px; }
+
+/* Logo tab bottom-right on content slides */
+.reveal .slide-logo { height: 40px !important; max-height: 40px !important; right: 40px !important; bottom: 24px !important; }
+/* Title slide from the Google deck: logos are part of the background image */
+.reveal section.gs-title h1 { font-size: 2.6em; margin: 40px 0 0.25em 0; }
+.reveal section.gs-title .gs-sub { display: block; color: #FFFFFF; font-size: 0.95em; font-weight: 400; }
+.reveal section.gs-title .gs-date { position: absolute; top: 900px; left: 0; color: #FFFFFF; font-size: 0.8em; }
+
+/* Speaker cards */
+.speakers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 60px; margin-top: 200px; }
+.speaker { display: flex; align-items: center; gap: 44px; }
+.reveal .speaker img.headshot { width: 220px; height: 220px; border-radius: 50%; object-fit: cover; margin: 0; flex: none; }
+.speaker .name { display: block; font-weight: 700; font-size: 1.05em; margin-bottom: 0.25em; }
+.speaker .role { display: block; font-family: "Source Code Pro", monospace; font-size: 0.65em; color: $posit-gray-light; }
+
+/* Audience polls */
+.reveal section.poll { padding-top: 280px; }
+.reveal section.poll h2 { font-size: 2.2em; line-height: 1.15; margin-bottom: 0.5em; }
+.reveal section.poll .eyebrow { display: block; text-transform: none; font-size: 0.75em; }
+.reveal section.poll .poll-hint { display: block; color: $muted-blue; font-size: 0.8em; }
+
+/* Resources slide: screenshot + QR pairs */
+.reveal section.resources img.dark-logo { margin-bottom: 48px; }
+.res-pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 60px; margin-top: 0.4em; }
+.res .t { display: block; font-weight: 700; font-size: 0.8em; color: #FFFFFF; margin-bottom: 0.5em; }
+.res p { margin: 0; }
+.res-body { display: flex; align-items: flex-end; gap: 28px; }
+.reveal img.res-shot { width: 560px; height: 460px; object-fit: cover; object-position: top left; border-radius: 12px; border: 1px solid $light-blue-1; margin: 0; display: block; }
+.res-qr { flex: none; width: 240px; }
+.reveal img.qr { width: 240px; height: 240px; border-radius: 12px; background: #FFFFFF; padding: 10px; margin: 0; display: block; box-sizing: border-box; }
+.qr-placeholder { display: flex; align-items: center; justify-content: center; text-align: center; width: 240px; height: 240px; box-sizing: border-box; border: 3px dashed $muted-blue; border-radius: 12px; color: $muted-blue; font-size: 0.55em; padding: 20px; }
+.reveal section.dark .qr-cap { display: block; margin-top: 12px; color: $muted-blue; font-family: "Source Code Pro", monospace; font-size: 0.45em; line-height: 1.3; }
+
+/* Full-color logo never on dark: hide the tab, dark slides carry the white logo */
+.reveal:has(section.dark.present) .slide-logo { display: none; }
+.reveal .slide-number { font-family: "Source Code Pro", monospace; color: $posit-gray-light; background: transparent; }
