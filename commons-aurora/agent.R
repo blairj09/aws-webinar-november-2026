@@ -15,6 +15,15 @@ AURORA_MODEL <- Sys.getenv("AURORA_MODEL", "us.anthropic.claude-sonnet-5-5")
 # needs no sandbox.
 AURORA_MODE <- Sys.getenv("AURORA_MODE", "normal")
 
+# Some hosts, such as a SageMaker Studio Space, offer neither Landlock nor
+# unprivileged user namespaces, so commons can't sandbox the agent's R session.
+# AURORA_ALLOW_UNSAFE_R=true opts in to commons' best-effort R guardrails
+# there. They are not a security boundary: use it only for development or a
+# demo on synthetic data, never as the default.
+if (identical(tolower(Sys.getenv("AURORA_ALLOW_UNSAFE_R")), "true")) {
+  options(commons.allow_unsafe_fallback = TRUE)
+}
+
 # Load the four tables from Athena once per R process. Every Shiny session
 # shares these data frames; commons copies them into an in-process DuckDB
 # for each agent, so agent-written SQL never runs against Athena directly.

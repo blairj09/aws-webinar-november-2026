@@ -23,11 +23,19 @@ The data is synthetic, and Aurora Lending Group is fictional.
 2. Open the `aws-webinar-november-2026/commons-aurora` folder in Positron, then install any missing packages in the R console:
 
    ```r
-   pak::pak(c("commons", "ellmer", "shinychat", "connectapi", "DBI", "bsicons",
+   pak::pak(c("commons (>= 0.2.0)", "ellmer", "shinychat", "connectapi", "DBI", "bsicons",
               "htmltools", "paws.analytics", "paws.security.identity", "paws.storage"))
    ```
 
-3. Open `app.R` and select **Run App**. The first start reads the tables from Athena and builds the context index, which takes a minute or two.
+3. A SageMaker Space can't sandbox the agent's R session, because it offers neither Landlock nor unprivileged user namespaces. For this demo on synthetic data, opt in to commons' best-effort R guardrails in the R console:
+
+   ```r
+   Sys.setenv(AURORA_ALLOW_UNSAFE_R = "true")
+   ```
+
+   These guardrails are not a security boundary. On a host that supports sandboxing, such as Posit Connect on a current Linux kernel, leave this unset. Alternatively, set `AURORA_MODE = "trusted only"`: the agent then answers only from trusted calculations and needs no sandbox.
+
+4. Open `app.R` and select **Run App**. The first start reads the tables from Athena and builds the context index, which takes a minute or two.
 
 The execution role needs:
 
