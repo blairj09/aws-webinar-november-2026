@@ -14,6 +14,7 @@
 !/security-guide/
 !/commons-aurora/
 !/posit-assistant-eda/
+!/bedrock-usage-dashboard/
 
 # Render outputs and local-only files inside the tracked folders
 /.quarto/
@@ -35,5 +36,7 @@
 /posit-assistant-eda/*.html
 /posit-assistant-eda/*_files/
 /posit-assistant-eda/brief.*
+/bedrock-usage-dashboard/*.html
+/bedrock-usage-dashboard/*_files/
 
 **/*.quarto_ipynb

@@ -1,0 +1,206 @@
+---
+title: "Amazon Bedrock usage"
+format:
+  dashboard:
+    theme: [cosmo, dashboard.scss]
+    nav-buttons:
+      - icon: github
+        href: https://github.com/blairj09/aws-webinar-november-2026
+params:
+  hours: 24
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(dplyr)
+library(plotly)
+`%||%` <- function(a, b) if (is.null(a)) b else a
+source("logs.R")
+
+hours <- as.numeric(params$hours)
+blue <- "#447099"
+palette <- c("#447099", "#EE6331", "#404041", "#419599", "#9A4665", "#72994E", "#D0DBE5", "#717171")
+
+# These personas are synthetic users that the demo setup seeds with usage.
+synthetic <- c("ana-ruiz", "raj-patel", "mei-chen", "sam-okafor")
+# Short model names: drop the ARN, inference profile prefix, provider, and
+# version suffix, so "us.anthropic.claude-haiku-4-5-20251001-v1:0" reads
+# "claude-haiku-4-5".
+short_model <- function(model) {
+  model |>
+    sub(pattern = "^.*inference-profile/", replacement = "") |>
+    sub(pattern = "^.*foundation-model/", replacement = "") |>
+    sub(pattern = "^(us|eu|apac|global)\\.", replacement = "") |>
+    sub(pattern = "^[a-z0-9-]+\\.", replacement = "") |>
+    sub(pattern = "-[0-9]{8}-v[0-9]+:[0-9]+$", replacement = "") |>
+    sub(pattern = "(-v[0-9]+)?:[0-9]+$", replacement = "")
+}
+
+label_caller <- function(role) {
+  caller <- caller_label(role)
+  ifelse(caller %in% synthetic, paste(caller, "(synthetic)"), caller)
+}
+
+totals <- logs_insights(paste(LOG_FIELDS, '
+  | stats count(*) as calls,
+          sum(input.inputTokenCount) as input_tokens,
+          sum(output.outputTokenCount) as output_tokens,
+          sum(input.cacheReadInputTokenCount) as cache_read_tokens,
+          sum(input.cacheWriteInputTokenCount) as cache_write_tokens
+    by role, model'), hours = hours)
+
+hourly <- logs_insights(paste(LOG_FIELDS, '
+  | stats count(*) as calls by bin(1h) as hour, role'), hours = hours)
+
+recent <- logs_insights(paste(LOG_FIELDS, '
+  | fields @timestamp as time,
+           input.inputTokenCount as input_tokens,
+           input.cacheReadInputTokenCount as cache_read_tokens,
+           output.outputTokenCount as output_tokens
+  | sort @timestamp desc
+  | limit 100
+  | display time, role, model, operation, inferenceRegion,
+            input_tokens, cache_read_tokens, output_tokens'), hours = hours)
+
+has_data <- nrow(totals) > 0
+if (has_data) {
+  totals <- totals |>
+    mutate(across(c(calls, ends_with("tokens")), \(x) coalesce(x, 0)),
+           caller = label_caller(role), model = short_model(model)) |>
+    summarise(across(c(calls, ends_with("tokens")), sum), .by = c(caller, model))
+  hourly <- hourly |> mutate(caller = label_caller(role))
+  recent <- recent |> mutate(caller = label_caller(role), model = short_model(model))
+}
+
+all_input <- if (has_data) {
+  sum(totals$input_tokens + totals$cache_read_tokens + totals$cache_write_tokens)
+} else 0
+window <- if (hours >= 48) paste(round(hours / 24), "days") else paste(hours, "hours")
+```
+
+# Overview
+
+## Row {height=20%}
+
+```{r}
+#| content: valuebox
+#| title: !expr paste("Model calls, last", window)
+list(icon = "chat-dots", color = "primary",
+     value = format(sum(totals$calls %||% 0), big.mark = ","))
+```
+
+```{r}
+#| content: valuebox
+#| title: "Callers"
+list(icon = "people", color = "light",
+     value = if (has_data) n_distinct(totals$caller) else 0)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Tokens in and out"
+list(icon = "arrow-left-right", color = "light",
+     value = format(all_input + sum(totals$output_tokens %||% 0), big.mark = ","))
+```
+
+```{r}
+#| content: valuebox
+#| title: "Input read from the prompt cache"
+list(icon = "lightning-charge", color = "light",
+     value = if (all_input > 0) scales::percent(sum(totals$cache_read_tokens) / all_input, accuracy = 1) else "-")
+```
+
+## Row {height=45%}
+
+```{r}
+#| title: "Calls per hour, by caller (UTC)"
+if (has_data) {
+  plot_ly(hourly, x = ~hour, y = ~calls, color = ~caller, colors = palette,
+          type = "bar", hovertemplate = "%{x}<br>%{y} calls<extra>%{fullData.name}</extra>") |>
+    layout(barmode = "stack", xaxis = list(title = ""), yaxis = list(title = "Calls"),
+           legend = list(font = list(size = 11))) |>
+    config(displayModeBar = FALSE)
+} else {
+  htmltools::p("No model calls in this window.")
+}
+```
+
+```{r}
+#| title: "Tokens by model"
+if (has_data) {
+  by_model <- totals |>
+    summarise(across(ends_with("tokens"), sum), .by = model) |>
+    arrange(input_tokens + cache_read_tokens + output_tokens)
+  plot_ly(by_model, y = ~model) |>
+    add_bars(x = ~input_tokens, name = "Input", orientation = "h", marker = list(color = blue)) |>
+    add_bars(x = ~cache_read_tokens, name = "Cache read", orientation = "h", marker = list(color = "#D0DBE5")) |>
+    add_bars(x = ~output_tokens, name = "Output", orientation = "h", marker = list(color = "#EE6331")) |>
+    layout(barmode = "stack", xaxis = list(title = "Tokens"),
+           yaxis = list(title = "", categoryorder = "trace"),
+           legend = list(orientation = "h", x = 0, y = 1.12)) |>
+    config(displayModeBar = FALSE)
+}
+```
+
+## Row {height=35%}
+
+```{r}
+#| title: "Usage by caller and model"
+if (has_data) {
+  totals |>
+    mutate(cache_share = cache_read_tokens /
+             pmax(input_tokens + cache_read_tokens + cache_write_tokens, 1)) |>
+    select(caller, model, calls, input_tokens, cache_read_tokens, output_tokens, cache_share) |>
+    arrange(desc(calls)) |>
+    reactable::reactable(
+      compact = TRUE, striped = TRUE, defaultPageSize = 8,
+      columns = list(
+        caller = reactable::colDef(name = "Caller"),
+        model = reactable::colDef(name = "Model"),
+        calls = reactable::colDef(name = "Calls", format = reactable::colFormat(separators = TRUE)),
+        input_tokens = reactable::colDef(name = "Input tokens", format = reactable::colFormat(separators = TRUE)),
+        cache_read_tokens = reactable::colDef(name = "Cache read", format = reactable::colFormat(separators = TRUE)),
+        output_tokens = reactable::colDef(name = "Output tokens", format = reactable::colFormat(separators = TRUE)),
+        cache_share = reactable::colDef(name = "From cache", format = reactable::colFormat(percent = TRUE, digits = 0))
+      )
+    )
+}
+```
+
+# Recent calls
+
+```{r}
+#| title: "The latest 100 model calls (UTC). Prompts and responses are not shown."
+if (has_data) {
+  recent |>
+    select(time, caller, model, operation, inferenceRegion,
+           input_tokens, cache_read_tokens, output_tokens) |>
+    reactable::reactable(
+      compact = TRUE, striped = TRUE, searchable = TRUE, defaultPageSize = 20,
+      columns = list(
+        time = reactable::colDef(name = "Time", format = reactable::colFormat(datetime = TRUE)),
+        caller = reactable::colDef(name = "Caller"),
+        model = reactable::colDef(name = "Model"),
+        operation = reactable::colDef(name = "Operation"),
+        inferenceRegion = reactable::colDef(name = "Inference Region"),
+        input_tokens = reactable::colDef(name = "Input", format = reactable::colFormat(separators = TRUE)),
+        cache_read_tokens = reactable::colDef(name = "Cache read", format = reactable::colFormat(separators = TRUE)),
+        output_tokens = reactable::colDef(name = "Output", format = reactable::colFormat(separators = TRUE))
+      )
+    )
+}
+```
+
+# About
+
+This dashboard reads Amazon Bedrock model invocation logs from CloudWatch Logs with [paws](https://www.paws-r-sdk.com/). Each chart runs a CloudWatch Logs Insights query, so the aggregation happens in AWS and only the summary comes back to R.
+
+- **Callers** come from the IAM role that made the call. Session names are left out, because for SSO users the session name is an email address.
+- **Prompts and responses** are in the logs, but this dashboard doesn't show them.
+- **Synthetic** callers are demo personas with seeded usage.
+- **Window:** set the `hours` parameter when you render, for example `quarto render dashboard.qmd -P hours:168` for the last 7 days.

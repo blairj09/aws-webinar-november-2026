@@ -9,6 +9,12 @@ options(commons.context_cache = "commons-cache")
 # Haiku 4.5 here: the demo account enforces a guardrail on that model.
 AURORA_MODEL <- Sys.getenv("AURORA_MODEL", "us.anthropic.claude-sonnet-5-5")
 
+# "normal" lets the agent write its own SQL and R when no trusted calculation
+# answers. Its R session needs an OS sandbox (Landlock or unprivileged user
+# namespaces). "trusted only" answers only from the trusted calculations and
+# needs no sandbox.
+AURORA_MODE <- Sys.getenv("AURORA_MODE", "normal")
+
 # Load the four tables from Athena once per R process. Every Shiny session
 # shares these data frames; commons copies them into an in-process DuckDB
 # for each agent, so agent-written SQL never runs against Athena directly.
@@ -132,8 +138,7 @@ aurora_measures <- function() {
 build_agent <- function(log = TRUE) {
   aws_credentials_refresh()
   tables <- aurora_tables()
-  commons::commons(
-    client = ellmer::chat_aws_bedrock(model = AURORA_MODEL),
+  aurora <- commons::commons(
     data_sources = list(
       aurora_lending = do.call(
         commons::data_source,
@@ -141,7 +146,12 @@ build_agent <- function(log = TRUE) {
       )
     ),
     semantic_layer = aurora_measures(),
-    context_layer = commons::context_layer("context/portfolio-risk-review.md"),
+    context_layer = commons::context_layer("context/portfolio-risk-review.md")
+  )
+  commons::agent(
+    ellmer::chat_aws_bedrock(model = AURORA_MODEL),
+    commons = aurora,
+    mode = AURORA_MODE,
     log = log
   )
 }

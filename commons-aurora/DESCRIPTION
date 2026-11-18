@@ -7,7 +7,7 @@ Description: A commons data agent for the synthetic Aurora Lending Group loan
 License: MIT
 Imports:
     bsicons,
-    commons,
+    commons (>= 0.2.0),
     connectapi,
     DBI,
     ellmer,
