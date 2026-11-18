@@ -11,10 +11,10 @@ Each chart runs a CloudWatch Logs Insights query, so the aggregation happens in 
 
 ## Render it
 
-Install the packages in the R console:
+Start R in the repository root, so that renv starts, and install the pinned packages:
 
 ```r
-pak::pak(c("dplyr", "plotly", "reactable", "readr", "scales", "paws.management"))
+renv::restore()
 ```
 
 Then render it. The `hours` parameter sets the window, and the default is 24 hours:

@@ -18,11 +18,10 @@ The data is synthetic, and Aurora Lending Group is fictional.
    git clone https://github.com/blairj09/aws-webinar-november-2026.git
    ```
 
-2. Open the `aws-webinar-november-2026` folder in Positron. Install any missing packages in the R console:
+2. Open the `aws-webinar-november-2026` folder in Positron, the repository root, so that renv starts. Then install the pinned packages in the R console:
 
    ```r
-   pak::pak(c("dplyr", "ggplot2", "readr", "scales",
-              "paws.analytics", "paws.security.identity", "paws.storage"))
+   renv::restore()
    ```
 
 3. Open `posit-assistant-eda/aurora-eda.qmd`, run the setup cell, and start with step 1.

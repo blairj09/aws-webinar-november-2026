@@ -13,4 +13,12 @@ The slides and the security guide are published at <https://blairj09.github.io/a
 - **`index.qmd`, `landing.css`, `assets/`:** the landing page for the published site.
 - **`publish.sh`:** renders the site and pushes it to the `gh-pages` branch.
 
+## Set up R
+
+The examples share one renv lockfile at the repository root. Start R in the repository root, then install the pinned packages:
+
+```r
+renv::restore()
+```
+
 All data in the demo is synthetic, and Aurora Lending Group is fictional.

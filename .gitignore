@@ -4,6 +4,9 @@
 /*
 !/.gitignore
 !/README.md
+!/.Rprofile
+!/renv.lock
+!/renv/
 !/_quarto.yml
 !/_quarto-publish.yml
 !/index.qmd
